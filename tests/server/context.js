@@ -14,9 +14,10 @@ Tinytest.add('Context - subscribe', function(test) {
 
   var expectedData = {
     subscriptions: {},
-    collectionData: {}
+    collectionData: {},
+    loginToken: undefined
   };
-  expectedData.subscriptions[pubName] = true;
+  expectedData.subscriptions[pubName] = {"[]": true};
   expectedData.collectionData[collName] = [
     coll.find().fetch()
   ];
@@ -43,9 +44,10 @@ Tinytest.add('Context - subscribe with this.x apis', function(test) {
 
   var expectedData = {
     subscriptions: {},
-    collectionData: {}
+    collectionData: {},
+    loginToken: undefined
   };
-  expectedData.subscriptions[pubName] = true;
+  expectedData.subscriptions[pubName] = {"[]": true};
   expectedData.collectionData[collName] = [
     coll.find().fetch()
   ];
@@ -64,7 +66,8 @@ Tinytest.add('Context - subscribe with this.x apis - no ready called', function(
 
   var expectedData = {
     subscriptions: {},
-    collectionData: {}
+    collectionData: {},
+    loginToken: undefined
   };
 
   test.equal(context.getData(), expectedData);

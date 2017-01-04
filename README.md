@@ -1,17 +1,18 @@
-[![Build Status](https://travis-ci.org/meteorhacks/fast-render.svg?branch=master)](https://travis-ci.org/meteorhacks/fast-render)
-
 # Fast Render
 
 Fast Render can improve the initial load time of your app, giving you 2-10 times faster initial page loads. It provides the same effect as Server Side Rendering (SSR), but still sends data over the wire to avoid breaking one of Meteor’s core principles.
 
+#### This is a continuation of `meteorhacks:fast-render` by @arunoda
+
 **Table of Contents**
-  
+
   - [Demo](#demo)
   - [Usage](#usage)
   - [How Fast Render Works](#how-fast-render-works)
   - [Using Fast Render With Iron Router](#using-fast-render-with-iron-router)
   - [Using Fast Render's route APIs](#using-fast-renders-route-apis)
   - [Security](#security)
+  - [Known Issues](#known-issues)
   - [Debugging](#debugging)
   - [Fast Render 2.x vs 1.x](#fast-render-2x-vs-1x)
 
@@ -21,11 +22,11 @@ Let's look at a demo. Here is the leaderboard example from [BulletProof Meteor](
 
 ![a Meteor app Without Fast Render](https://cldup.com/v4PmJqPtlY.png)
 
-Here you see the loading screen while we wait on data to render the acutual leaderboard.
+Here you see the loading screen while we wait on data to render the actual leaderboard.
 
 ---
 
-Now let's see how the leaderboard loads when using use Fast Render: [click here](https://bulletproofmeteor.com/leaderboard).
+Now let's see how the leaderboard loads when using Fast Render: [click here](https://bulletproofmeteor.com/leaderboard).
 
 You never see the loading screen becuase we don't have to wait on data. Right after the page is loaded, the leaderboard is there. To do this, all we've done is add Fast Render to the app and insert a single line of configuration.
 
@@ -39,10 +40,14 @@ Check this demo [video](https://www.youtube.com/watch?v=mGcE6UVOqPk) if you need
 Add Fast Render to your Meteor app:
 
 ~~~shell
-meteor add meteorhacks:fast-render
+meteor add staringatlights:fast-render
 ~~~
 
-After that, make sure you've moved your Iron Router routes (`router.js` file or relavant files) to a place which can be access by both server and client. (i.e. the `lib` folder).
+After that, make sure you've moved your route related code (`router.js` file or relavant files) to a place which can be access by both server and client. (i.e. the `lib` folder).
+
+**To add Fast Render support to FlowRouter, visit [here](https://github.com/kadirahq/flow-router#fast-render).**
+
+Rest of the documentation is for apps utilizing Iron Router.
 
 Then add the `fastRender: true` option to your route:
 
@@ -50,7 +55,7 @@ Then add the `fastRender: true` option to your route:
 this.route('leaderboard', {
   path: '/leaderboard/:date?',
   waitOn: function(){
-    return Meteor.subscribe('leaderboard'); 
+    return Meteor.subscribe('leaderboard');
   },
   fastRender: true
 });
@@ -84,7 +89,7 @@ The next step is to specify which routes you'd like to apply Fast Render to. Tha
 this.route('leaderboard', {
   path: '/leaderboard/:date?',
   waitOn: function(){
-    return Meteor.subscribe('leaderboard'); 
+    return Meteor.subscribe('leaderboard');
   },
   fastRender: true
 });
@@ -149,7 +154,7 @@ FastRender.route('/leaderboard/:date', function(params) {
 
 #### FastRender.onAllRoutes(callback)
 
-This is very similar to `FastRender.route`, but lets you register a callback which will run on all routes. 
+This is very similar to `FastRender.route`, but lets you register a callback which will run on all routes.
 
 Use it like this:
 
@@ -176,7 +181,7 @@ So if you are doing some DB write operations or saving something to the filesyst
 It is wise to avoid side effects from following places:
 
 * publications
-* fastRender routes 
+* fastRender routes
 * IronRouter waitOn and subscriptions methods
 
 #### CORS Headers
@@ -187,11 +192,29 @@ Fast Render detects CORS headers with conflicting routes and turns off fast rend
 
 It's okay to add CORS headers to custom server side routes, but if they conflict with the client side routes (which are handled by Fast Render), then there will be a security issue. It would allow malicious XHR requests from other domains to access loggedIn user's subscription data.
 
-#### Shared Domains
+#### Cookie Tossing
 
-If your app is available under a shared domain like `*.meteor.com` or `*.herokuapp.com`, then you are exposed to a serious [security issue](https://groups.google.com/forum/#!topic/meteor-talk/Zhy1c6MdOH8). In these situations, don't use Fast Render.
+If your app is available under a shared domain like `*.meteor.com` or `*.herokuapp.com`, there is a potential [security issue](https://groups.google.com/forum/#!topic/meteor-talk/Zhy1c6MdOH8).
+
+**We've made some [protection](https://groups.google.com/d/msg/meteor-talk/LTO2n5D1bxY/J5EnVpJo0rAJ) to this issue; so you can still use Fast Render.**
 
 If you host your app under `*.meteor.com` etc. but use a separate domain, then your app will not be vulnerable in this way.
+
+## Known Issues
+
+### Client Error: "Server sent add for existing id"
+
+If you are getting this issue, it seems like you are doing a database write operation inside a `Template.rendered` (Template.yourTemplate.rendered).
+
+To get around with this issue, rather than invoking a DB operation with MiniMongo, try to invoke a method call.
+
+Related Issue & Discussion: <https://github.com/meteorhacks/fast-render/issues/80>
+
+### No data is injected when using "AppCache" package
+
+Currently FastRender does not support simultaneous usage with [appcache package](https://atmospherejs.com/meteor/appcache)
+
+Related Issue & Discussion: <https://github.com/kadirahq/fast-render/issues/136>
 
 ## Debugging
 
@@ -259,7 +282,7 @@ FastRender.debugger.enableFR()
 
 #### Logs
 
-Fast Render has robust logging. 
+Fast Render has robust logging.
 
 You can turn it on using `FastRender.debugger.showLogs()`.
 
@@ -285,7 +308,7 @@ Now, you've to set `fastRender:true` option in the route level and there is no `
 Fast Render 1.x comes with a lot of additional APIs. Now [these](#using-fast-renders-route-apis) are the only API's comes with Fast Render.
 
 * FastRender.route(<route-def>, <callback>)
-* FastRender.onAllRouters(<callback>)
+* FastRender.onAllRoutes(<callback>)
 
 #### Debugger
 
